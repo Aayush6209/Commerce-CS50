@@ -1,0 +1,78 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+{% if winner is null %}
+    {% if Creator %}
+        <form action="{% url 'listing' listing.id %}" method="post">
+            {% csrf_token %}
+            <input type="submit" class="btn btn-primary" style="margin: 5px;" value="Close Listing" name="CLOSE">
+        </form>
+    {% endif %}
+{% endif %}
+
+{% if Present_already %}
+
+<form action="{% url 'watchlist'%}" method="POST">
+    {% csrf_token %}
+    <input type="hidden" value="{{ listing.id }}" name="listing">
+    <input type="hidden" value="YES" name="remove">
+    <input type="submit" class="btn btn-primary" style="margin: 5px;" value="Remove from Watchlist">
+</form>
+
+{% else %}
+
+<form action="{% url 'watchlist'%}" method="POST">
+    {% csrf_token %}
+    <input type="hidden" value="{{ listing.id }}" name="listing">
+    <input type="submit" class="btn btn-primary" style="margin: 5px;" value="ADD to Watchlist">
+</form>
+
+{% endif %}
+
+
+
+<div class="column" style="align-items: center; text-align: center;">
+    <h1>Listing: {{ listing.title }}</h1>
+    <img style="width: 700px; height: auto; border: darkgrey; border-style: double; border-width: 5px;"
+        src="{{ listing.photo }}">
+    <p style="text-align: left;">{{ listing.description }}</p>
+    <h2 style="text-align: left;">${{ listing.current_price }}</h2>
+    <p style="text-align: left;">Currently {{ bidCount }} bids placed so far.</p>
+</div>
+
+{% if winner is null %}
+{% if not Creator %}
+<form action="{% url 'listing' listing.id %}" method="POST">
+    {% csrf_token %}
+    <input type="number" placeholder="USD" name="amt" style="margin-bottom: 10px;">
+    <br>
+    <input type="hidden" value="{{ user.id }}" name="buyer">
+    <input type="hidden" value="{{ listing.id }}" name="product">
+    <input class="btn btn-primary" type="submit" value="Place bid">
+</form>
+{% endif %}
+
+<h2>Details</h2>
+<ul>
+    <li>Listed by: {{ seller.username }}</li>
+    <li>Date: {{ listing.date }}</li>
+</ul>
+
+<form action="{% url 'Addcomment' listing.id %}" method="POST">
+    {%csrf_token%}
+    <textarea placeholder="Comment" name="comment" style="width: 900px; height: 250px;">
+</textarea>
+    <input type="hidden" name="commentator" value="{{ user.username }}">
+    <input type="submit" class="btn btn-primary" style="margin: 5px;" value="ADD Comment">
+</form>
+{% else %}
+<h1 style="color:springgreen;">This auction has been won by {{ winner }}</h1>
+{% endif %}
+<h2>Comments ({{ commentCount }})</h2>
+<ul>
+    {% for comment in comments %}
+    <li>{{comment}}</li>
+    {% endfor %}
+</ul>
+{% endblock %}
